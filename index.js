@@ -225,90 +225,90 @@ app.delete("/santri/:id/absensi/:absensiId", (req, res) => {
 // HAFALAN
 // =====================================================================================================================
 
-// ambil data hafalan 1 santri sesuai id
-app.get("/santri/:id/hafalan", (req, res) => {
-  const { id } = req.params;
-  const query = "SELECT * FROM hafalan_alquran WHERE santri_id = ?";
-  connection.query(query, [id], (error, results) => {
-    if (error) {
-      console.error("Error retrieving absensi santri:", error);
-      res.status(500).json({ error: "Error retrieving absensi santri" });
-    } else {
-      res.status(200).json(results);
-    }
-  });
-});
+// // ambil data hafalan 1 santri sesuai id
+// app.get("/santri/:id/hafalan", (req, res) => {
+//   const { id } = req.params;
+//   const query = "SELECT * FROM hafalan_alquran WHERE santri_id = ?";
+//   connection.query(query, [id], (error, results) => {
+//     if (error) {
+//       console.error("Error retrieving absensi santri:", error);
+//       res.status(500).json({ error: "Error retrieving absensi santri" });
+//     } else {
+//       res.status(200).json(results);
+//     }
+//   });
+// });
 
-// tambah data hafalan 1 santri sesuai id
-app.post("/santri/:id/hafalan", (req, res) => {
-  const { id } = req.params;
-  const { total, surat, halaman, ayat } = req.body;
+// // tambah data hafalan 1 santri sesuai id
+// app.post("/santri/:id/hafalan", (req, res) => {
+//   const { id } = req.params;
+//   const { total, surat, halaman, ayat } = req.body;
 
-  const query =
-    "INSERT INTO hafalan_alquran (santri_id,  total, surat, halaman, ayat) VALUES (?, ?, ?, ?, ?)";
-  connection.query(
-    query,
-    [id, total, surat, halaman, ayat],
-    (error, results) => {
-      if (error) {
-        console.error("Error adding hafalan:", error);
-        res.status(500).json({ error: "Error adding hafalan" });
-      } else {
-        res.status(201).json({
-          santri_id: id,
-          total,
-          surat,
-          halaman,
-          ayat,
-        });
-      }
-    }
-  );
-});
+//   const query =
+//     "INSERT INTO hafalan_alquran (santri_id,  total, surat, halaman, ayat) VALUES (?, ?, ?, ?, ?)";
+//   connection.query(
+//     query,
+//     [id, total, surat, halaman, ayat],
+//     (error, results) => {
+//       if (error) {
+//         console.error("Error adding hafalan:", error);
+//         res.status(500).json({ error: "Error adding hafalan" });
+//       } else {
+//         res.status(201).json({
+//           santri_id: id,
+//           total,
+//           surat,
+//           halaman,
+//           ayat,
+//         });
+//       }
+//     }
+//   );
+// });
 
-// edit 1 data hafalan sesuai id dari 1 santri sesuai id
-app.patch("/santri/:id/hafalan/:hafalanId", (req, res) => {
-  const { id, hafalanId } = req.params;
-  const { tanggal, total, surat, halaman, ayat } = req.body;
+// // edit 1 data hafalan sesuai id dari 1 santri sesuai id
+// app.patch("/santri/:id/hafalan/:hafalanId", (req, res) => {
+//   const { id, hafalanId } = req.params;
+//   const { tanggal, total, surat, halaman, ayat } = req.body;
 
-  const query =
-    "UPDATE hafalan_alquran SET tanggal = ?, total = ?, surat = ?, halaman = ?, ayat = ? WHERE santri_id = ? AND id = ?";
-  connection.query(
-    query,
-    [tanggal, total, surat, halaman, ayat, id, hafalanId],
-    (error, results) => {
-      if (error) {
-        console.error("Error updating hafalan:", error);
-        res.status(500).json({ error: "Error updating hafalan" });
-      } else {
-        res.status(200).json({
-          id: hafalanId,
-          santri_id: id,
-          tanggal,
-          total,
-          surat,
-          halaman,
-          ayat,
-        });
-      }
-    }
-  );
-});
+//   const query =
+//     "UPDATE hafalan_alquran SET tanggal = ?, total = ?, surat = ?, halaman = ?, ayat = ? WHERE santri_id = ? AND id = ?";
+//   connection.query(
+//     query,
+//     [tanggal, total, surat, halaman, ayat, id, hafalanId],
+//     (error, results) => {
+//       if (error) {
+//         console.error("Error updating hafalan:", error);
+//         res.status(500).json({ error: "Error updating hafalan" });
+//       } else {
+//         res.status(200).json({
+//           id: hafalanId,
+//           santri_id: id,
+//           tanggal,
+//           total,
+//           surat,
+//           halaman,
+//           ayat,
+//         });
+//       }
+//     }
+//   );
+// });
 
-// hapus 1 data hafalan sesuai id dari 1 santri sesuai id
-app.delete("/santri/:id/hafalan/:hafalanId", (req, res) => {
-  const { id, hafalanId } = req.params;
+// // hapus 1 data hafalan sesuai id dari 1 santri sesuai id
+// app.delete("/santri/:id/hafalan/:hafalanId", (req, res) => {
+//   const { id, hafalanId } = req.params;
 
-  const query = "DELETE FROM hafalan_alquran WHERE santri_id = ? AND id = ?";
-  connection.query(query, [id, hafalanId], (error, results) => {
-    if (error) {
-      console.error("Error deleting hafalan:", error);
-      res.status(500).json({ error: "Error deleting hafalan" });
-    } else {
-      res.status(200).json({ message: "Hafalan deleted successfully" });
-    }
-  });
-});
+//   const query = "DELETE FROM hafalan_alquran WHERE santri_id = ? AND id = ?";
+//   connection.query(query, [id, hafalanId], (error, results) => {
+//     if (error) {
+//       console.error("Error deleting hafalan:", error);
+//       res.status(500).json({ error: "Error deleting hafalan" });
+//     } else {
+//       res.status(200).json({ message: "Hafalan deleted successfully" });
+//     }
+//   });
+// });
 
 // Start server
 app.listen(port, () => {
