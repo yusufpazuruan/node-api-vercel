@@ -109,7 +109,120 @@ app.delete("/santri/:id", (req, res) => {
 });
 
 // =====================================================================================================================
-// 
+// ABSENSI
+// =====================================================================================================================
+
+// ambil data absensi 1 satri sesuai id
+app.get("/santri/:id/absensi", (req, res) => {
+  const { id } = req.params;
+  const query = "SELECT * FROM absensi WHERE santri_id = ?";
+  connection.query(query, [id], (error, results) => {
+    if (error) {
+      console.error("Error retrieving absensi santri:", error);
+      res.status(500).json({ error: "Error retrieving absensi santri" });
+    } else {
+      res.status(200).json(results);
+    }
+  });
+});
+
+// tambah data absensi 1 santri sesuai id
+app.post("/santri/:id/absensi", (req, res) => {
+  const { id, status, status_pengajar, mapel, pengajar } = req.body;
+
+  const query =
+    "INSERT INTO absensi (santri_id, status, status_pengajar, mapel, pengajar) VALUES (?, ?, ?, ?, ?)";
+  connection.query(
+    query,
+    [id, status, status_pengajar, mapel, pengajar],
+    (error, results) => {
+      if (error) {
+        console.error("Error adding absensi:", error);
+        res.status(500).json({ error: "Error adding absensi" });
+      } else {
+        res.status(201).json({
+          santri_id: id,
+          status: status,
+          status_pengajar: status_pengajar,
+          mapel: mapel,
+          pengajar: pengajar,
+        });
+      }
+    }
+  );
+});
+
+// tambah data absesnsi santri perkelas / banyak santri sekaligus
+app.post("/santri/absensi", (req, res) => {
+  const { santriOptions } = req.body;
+
+  const values = santriOptions.map((santri) => [
+    santri.id,
+    santri.status,
+    santri.status_pengajar,
+    santri.mapel,
+    santri.pengajar,
+  ]);
+
+  const query =
+    "INSERT INTO absensi (santri_id, status, status_pengajar, mapel, pengajar) VALUES ?";
+
+  connection.query(query, [values], (error, results) => {
+    if (error) {
+      console.error("Error adding absensi:", error);
+      res.status(500).json({ error: "Error adding absensi" });
+    } else {
+      res.status(201).json({ success: true });
+    }
+  });
+});
+
+// edit data absensi sesuai id dari id santri
+app.patch("/santri/:id/absensi/:absensiId", (req, res) => {
+  const { id, absensiId } = req.params;
+  const { tanggal, status, keterangan, mapel, pengajar } = req.body;
+
+  const query =
+    "UPDATE absensi SET tanggal = ?, status = ?, keterangan = ?, mapel = ?, pengajar = ? WHERE id = ?";
+  connection.query(
+    query,
+    [tanggal, status, keterangan, mapel, pengajar, absensiId],
+    (error, results) => {
+      if (error) {
+        console.error("Error updating absensi:", error);
+        res.status(500).json({ error: "Error updating absensi" });
+      } else {
+        res.status(200).json({
+          id: absensiId,
+          santri_id: id,
+          tanggal: tanggal,
+          status: status,
+          keterangan: keterangan,
+          mapel: mapel,
+          pengajar: pengajar,
+        });
+      }
+    }
+  );
+});
+
+// hapus data absensi sesuai id dari id santri
+app.delete("/santri/:id/absensi/:absensiId", (req, res) => {
+  const { id, absensiId } = req.params;
+
+  const query = "DELETE FROM absensi WHERE id = ?";
+  connection.query(query, [absensiId], (error, results) => {
+    if (error) {
+      console.error("Error deleting absensi:", error);
+      res.status(500).json({ error: "Error deleting absensi" });
+    } else {
+      res.status(200).json({ message: `Absensi deleted successfully` });
+    }
+  });
+});
+
+// =====================================================================================================================
+// HAFALAN
 // =====================================================================================================================
 
 
