@@ -39,6 +39,21 @@ app.get("/santri", (req, res) => {
   });
 });
 
+app.get("/santri/:id", (req, res) => {
+  const { id } = req.params;
+  const query = "SELECT * FROM santri WHERE id = ?";
+  connection.query(query, [id], (error, results) => {
+    if (error) {
+      console.error("Error retrieving santri:", error);
+      res.status(500).json({ error: "Error retrieving santri" });
+    } else if (results.length === 0) {
+      res.status(404).json({ error: "Santri not found" });
+    } else {
+      res.status(200).json(results[0]);
+    }
+  });
+});
+
 
 
 // Start server
