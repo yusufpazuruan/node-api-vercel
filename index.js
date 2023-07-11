@@ -26,7 +26,7 @@ connection.connect((error) => {
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// ambil data tabel santri
 app.get("/santri", (req, res) => {
   const query = "SELECT * FROM santri";
   connection.query(query, (error, results) => {
@@ -39,6 +39,7 @@ app.get("/santri", (req, res) => {
   });
 });
 
+// ambil 1 data santri sesuai id
 app.get("/santri/:id", (req, res) => {
   const { id } = req.params;
   const query = "SELECT * FROM santri WHERE id = ?";
@@ -54,6 +55,62 @@ app.get("/santri/:id", (req, res) => {
   });
 });
 
+// add satu santri / banyak santri
+app.post("/santri", (req, res) => {
+  const { nis, kelas, nama, wali_kelas, active } = req.body;
+  const query =
+    "INSERT INTO santri (nis, kelas, nama, wali_kelas, active) VALUES (?, ?, ?, ?, ?)";
+  connection.query(
+    query,
+    [nis, kelas, nama, wali_kelas, active],
+    (error, results) => {
+      if (error) {
+        console.error("Error adding santri:", error);
+        res.status(500).json({ error: "Error adding santri" });
+      } else {
+        res.status(201).json({ id: results.insertId, ...req.body });
+      }
+    }
+  );
+});
+
+// edit 1 santri sesuai id
+app.patch("/santri/:id", (req, res) => {
+  const { id } = req.params;
+  const { nis, kelas, nama, wali_kelas, active } = req.body;
+  const query =
+    "UPDATE santri SET nis = ?, kelas = ?, nama = ?, wali_kelas = ?, active = ? WHERE id = ?";
+  connection.query(
+    query,
+    [nis, kelas, nama, wali_kelas, active, id],
+    (error) => {
+      if (error) {
+        console.error("Error updating santri:", error);
+        res.status(500).json({ error: "Error updating santri" });
+      } else {
+        res.status(200).json({ id, nis, kelas, nama, wali_kelas, active });
+      }
+    }
+  );
+});
+
+// hapus 1 santri sesuai id
+app.delete("/santri/:id", (req, res) => {
+  const { id } = req.params;
+  const query = "DELETE FROM santri WHERE id = ?";
+  connection.query(query, [id], (error) => {
+    if (error) {
+      console.error("Error deleting santri:", error);
+      res.status(500).json({ error: "Error deleting santri" });
+    } else {
+      res.status(200).json({ message: "Santri deleted" });
+    }
+  });
+});
+
+// =====================================================================================================================
+// 
+// =====================================================================================================================
 
 
 // Start server
