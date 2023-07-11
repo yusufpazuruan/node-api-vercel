@@ -310,6 +310,209 @@ app.delete("/santri/:id/hafalan/:hafalanId", (req, res) => {
   });
 });
 
+// =====================================================================================================================
+// TAHSIN
+// =====================================================================================================================
+
+// ambil semua data tahsin dari 1 santri sesuai id
+app.get("/santri/:id/tahsin", (req, res) => {
+  const { id } = req.params;
+  const query = "SELECT * FROM tahsin_alquran WHERE santri_id = ?";
+  connection.query(query, [id], (error, results) => {
+    if (error) {
+      console.error("Error retrieving absensi santri:", error);
+      res.status(500).json({ error: "Error retrieving absensi santri" });
+    } else {
+      res.status(200).json(results);
+    }
+  });
+});
+
+// tambah 1 data tahsin dari 1 santri sesuai id
+app.post("/santri/:id/tahsin", (req, res) => {
+  const { id } = req.params;
+  const { tanggal, surat, halaman, ayat } = req.body;
+
+  const query =
+    "INSERT INTO tahsin_alquran (santri_id, tanggal,  surat, halaman, ayat) VALUES (?, ?, ?, ?, ?)";
+  connection.query(
+    query,
+    [id, tanggal, surat, halaman, ayat],
+    (error, results) => {
+      if (error) {
+        console.error("Error adding tahsin:", error);
+        res.status(500).json({ error: "Error adding tahsin" });
+      } else {
+        res.status(201).json({
+          id: results.insertId,
+          santri_id: id,
+          tanggal,
+          surat,
+          halaman,
+          ayat,
+        });
+      }
+    }
+  );
+});
+
+// edit 1 data tahsin dari 1 santri sesuai id
+app.patch("/santri/:id/tahsin/:tahsinId", (req, res) => {
+  const { id, tahsinId } = req.params;
+  const { tanggal, surat, halaman, ayat } = req.body;
+
+  const query =
+    "UPDATE tahsin_alquran SET tanggal = ?, surat = ?, halaman = ?, ayat = ? WHERE santri_id = ? AND id = ?";
+  connection.query(
+    query,
+    [tanggal, surat, halaman, ayat, id, tahsinId],
+    (error, results) => {
+      if (error) {
+        console.error("Error updating tahsin:", error);
+        res.status(500).json({ error: "Error updating tahsin" });
+      } else {
+        res.status(200).json({
+          id: tahsinId,
+          santri_id: id,
+          tanggal,
+          surat,
+          halaman,
+          ayat,
+        });
+      }
+    }
+  );
+});
+
+// hapus 1 data tahsin dari 1 santri sesuai id
+app.delete("/santri/:id/tahsin/:tahsinId", (req, res) => {
+  const { id, tahsinId } = req.params;
+
+  const query = "DELETE FROM tahsin_alquran WHERE santri_id = ? AND id = ?";
+  connection.query(query, [id, tahsinId], (error, results) => {
+    if (error) {
+      console.error("Error deleting tahsin:", error);
+      res.status(500).json({ error: "Error deleting tahsin" });
+    } else {
+      res.status(200).json({ message: "tahsin deleted successfully" });
+    }
+  });
+});
+
+
+// =====================================================================================================================
+// mengambil semua data yg diingkan | JOIN TABEL
+// =====================================================================================================================
+
+
+// join table untuk menampilkan data sesuai kebutuhan
+app.get("/santris", (req, res) => {
+  const query = `
+    SELECT
+    santri.id,
+  santri.nama,
+  santri.kelas,
+  santri.wali_kelas,
+  latest_hafalan.total,
+  latest_hafalan.surat,
+  latest_hafalan.halaman,
+  latest_hafalan.ayat,
+  jumlah_absensi.jumlah_hadir,
+  jumlah_absensi.jumlah_sakit,
+  jumlah_absensi.jumlah_izin,
+  jumlah_absensi.jumlah_ghoib
+FROM
+  santri
+  LEFT JOIN (
+    SELECT
+      hafalan_alquran.santri_id,
+      hafalan_alquran.total,
+      hafalan_alquran.surat,
+      hafalan_alquran.halaman,
+      hafalan_alquran.ayat
+    FROM
+      hafalan_alquran
+    INNER JOIN (
+      SELECT
+        santri_id,
+        MAX(tanggal) AS max_tanggal
+      FROM
+        hafalan_alquran
+      GROUP BY
+        santri_id
+    ) AS max_hafalan ON hafalan_alquran.santri_id = max_hafalan.santri_id AND hafalan_alquran.tanggal = max_hafalan.max_tanggal
+  ) AS latest_hafalan ON santri.id = latest_hafalan.santri_id
+  LEFT JOIN (
+    SELECT
+      absensi.santri_id,
+      SUM(CASE WHEN absensi.status = 'hadir' THEN 1 ELSE 0 END) AS jumlah_hadir,
+      SUM(CASE WHEN absensi.status = 'sakit' THEN 1 ELSE 0 END) AS jumlah_sakit,
+      SUM(CASE WHEN absensi.status = 'izin' THEN 1 ELSE 0 END) AS jumlah_izin,
+      SUM(CASE WHEN absensi.status = 'ghoib' THEN 1 ELSE 0 END) AS jumlah_ghoib
+    FROM
+      absensi
+    WHERE
+      DATE(absensi.tanggal) = CURDATE()
+    GROUP BY
+      absensi.santri_id
+  ) AS jumlah_absensi ON santri.id = jumlah_absensi.santri_id;`;
+
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error("Error fetching data:", error);
+      res.status(500).json({ error: "Error fetching data" });
+    } else {
+      res.status(200).json(results);
+    }
+  });
+});
+
+// =====================================================================================================================
+// ISASI = INPUT SANTRI ABSENSI SAKIT IZIN
+// =====================================================================================================================
+
+// ambil 1 data santri sesuai id dari 1 santri sesuai id
+app.get("/santri/:id/isasi", (req, res) => {
+  const query = `SELECT santri_id, status, keterangan, sampai_tgl, ttd
+FROM isasi
+WHERE sampai_tgl = (SELECT MAX(sampai_tgl) FROM isasi WHERE sampai_tgl > NOW());`;
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error("Error retrieving isasi:", error);
+      res.status(500).json({ error: "Error retrieving santri" });
+    } else {
+      res.status(200).json(results);
+    }
+  });
+});
+
+// tambah 1 data santri sesuai id dari 1 santri sesuai id
+app.post("/santri/:id/isasi", (req, res) => {
+  const santri_id = req.params.id;
+  let { status, keterangan, sampai_tgl, pejuang, ttd } = req.body;
+
+  // Jika status bernilai NULL, set nilai default menjadi "HADIR"
+  // if (status === null || status === undefined) {
+  //   status = "HADIR";
+  // }
+
+  const query =
+    "INSERT INTO isasi (santri_id, status, keterangan, sampai_tgl, pejuang, ttd) VALUES (?, ?, ?, ?, ?, ?)";
+  connection.query(
+    query,
+    [santri_id, status, keterangan, sampai_tgl, pejuang, ttd],
+    (error, results) => {
+      if (error) {
+        console.error("Error adding isagis:", error);
+        res.status(500).json({ error: "Error adding isagis" });
+      } else {
+        res.status(201).json({ id: results.insertId, ...req.body });
+      }
+    }
+  );
+});
+
+
 // Start server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
