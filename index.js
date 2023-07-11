@@ -7,10 +7,11 @@ const port = 3000;
 
 // Konfigurasi koneksi ke database
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "db_santri_ab",
+  host: "bt0c1py6lc9las0dii7m-mysql.services.clever-cloud.com",
+  user: "ua4onvx8scjxye5f",
+  password: "sM8aheuhLp98hPry9lKK",
+  database: "bt0c1py6lc9las0dii7m",
+ 
 });
 
 connection.connect((error) => {
