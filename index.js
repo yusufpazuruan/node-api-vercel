@@ -503,8 +503,8 @@ app.post("/santri/:id/isasi", (req, res) => {
     [santri_id, status, keterangan, sampai_tgl, pejuang, ttd],
     (error, results) => {
       if (error) {
-        console.error("Error adding isagis:", error);
-        res.status(500).json({ error: "Error adding isagis" });
+        console.error("Error adding isais:", error);
+        res.status(500).json({ error: "Error adding isais" });
       } else {
         res.status(201).json({ id: results.insertId, ...req.body });
       }
